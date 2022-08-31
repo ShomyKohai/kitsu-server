@@ -238,6 +238,23 @@ class Types::QueryType < GraphQL::Schema::Object
     Loaders::SlugLoader.for(::Character, token: context[:token]).load(slug)
   end
 
+  field :search_character_by_name, Types::Character.connection_type, null: true do
+    description <<~DESCRIPTION.squish
+      Search for Character by name using Algolia.
+      The most relevant results will be at the top.
+    DESCRIPTION
+    argument :name, String, required: true
+  end
+
+  def search_character_by_name(name:)
+    service = AlgoliaGraphqlSearchService.new(::Character, context[:token])
+    service.search(
+      name,
+      restrict_searchable_attributes: %w[canonical_name other_names names] 
+      #"names" seems to be added to the Algolia Indx
+    )
+  end
+
   field :session, Types::Session,
     null: false,
     description: 'Get your current session info'
