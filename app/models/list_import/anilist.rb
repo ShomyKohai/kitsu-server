@@ -2,61 +2,8 @@
 
 class ListImport
   class Anilist < ListImport
-    # accepts a username as input
-    validates :input_text, length: {
-      minimum: 3,
-      maximum: 20
-    }, presence: true
-    # does not accept file uploads
-    validates :input_file_data, absence: true
-    validate :ensure_user_exists, on: :create
-
-    def ensure_user_exists
-      return false if input_text.blank?
-      return true if user_exists?
-
-      errors.add(:input_text, "AniList user not found - #{input_text}")
-    end
-
-    def count
-      @count ||= anime_list.count + manga_list.count
-    end
-
-    def each
-      %w[anime manga].each do |type|
-        send(:"#{type}_list").each do |media|
-          row = Row.new(media, type)
-
-          yield row.media, row.data
-        end
-      end
-    end
-
-    private
-
-    def anime_list
-      media_lists.data.anime.lists.map(&:entries).flatten
-    end
-
-    def manga_list
-      media_lists.data.manga.lists.map(&:entries).flatten
-    end
-
-    def user_exists?
-      @user_exists ||= media_lists&.errors&.detect { |error| error.last.include?('404') }.blank?
-    end
-
-    def media_lists
-      @media_lists ||= AnilistApiWrapper::Client.query(
-        self.class.media_list_query,
-        variables: {
-          user_name: input_text
-        }
-      )
-    end
-
-    def self.media_list_query
-      @media_list_query ||= AnilistApiWrapper::Client.parse <<-GRAPHQL
+    ANILIST_API = 'https://graphql.anilist.co'
+    MEDIA_LIST_QUERY = <<-GRAPHQL
         query($user_name: String) {
           anime: MediaListCollection(userName: $user_name, type: ANIME) {
             lists {
@@ -129,7 +76,55 @@ class ListImport
             }
           }
         }
-      GRAPHQL
+    GRAPHQL
+
+    # accepts a username as input
+    validates :input_text, length: {
+      minimum: 3,
+      maximum: 20
+    }, presence: true
+    # does not accept file uploads
+    validates :input_file_data, absence: true
+    validate :ensure_user_exists, on: :create
+
+    def ensure_user_exists
+      return false if input_text.blank?
+      return true if user_exists?
+
+      errors.add(:input_text, "AniList user not found - #{input_text}")
+    end
+
+    def count
+      @count ||= list('anime').count + list('manga').count
+    end
+
+    def each
+      %w[anime manga].each do |type|
+        list(type).each do |media|
+          row = Row.new(media, type)
+
+          yield row.media, row.data
+        end
+      end
+    end
+
+    private
+
+    def list(type)
+      media_lists.dig('data', type, 'lists').flat_map { |list| list['entries'] }
+    end
+
+    def user_exists?
+      @user_exists ||= media_lists['errors']&.detect { |error| error.last.include?('404') }.blank?
+    end
+
+    def media_lists
+      @media_lists ||= Oj.load(HTTP.post(ANILIST_API, json: {
+        query: MEDIA_LIST_QUERY,
+        variables: {
+          user_name: input_text
+        }
+      }).body)
     end
 
   rescue StandardError => e

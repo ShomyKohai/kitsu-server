@@ -10,15 +10,9 @@ RSpec.describe ListImport::Anilist do
     )
   end
 
-  let(:media_lists) do
-    JSON.parse(fixture('list_import/anilist/toyhammered_full_list.json'))
-        .deep_transform_keys(&:underscore)
-  end
-
   before do
-    allow(AnilistApiWrapper::Client).to receive(:query) {
-      JSON.parse(media_lists.to_json, object_class: OpenStruct)
-    }
+    stub_request(:post, 'https://graphql.anilist.co')
+      .to_return(body: fixture('list_import/anilist/toyhammered_full_list.json'))
   end
 
   describe 'validations' do
