@@ -15,7 +15,7 @@ class ListImport
           Mapping.create(
             item: mal_mapping,
             external_site: anilist_key,
-            external_id: media_data.id
+            external_id: media_data['id']
           )
 
           return mal_mapping
@@ -131,7 +131,7 @@ class ListImport
       end
 
       def anilist_mapping
-        @anilist_mapping ||= Mapping.lookup(anilist_key, media_data.id)
+        @anilist_mapping ||= Mapping.lookup(anilist_key, media_data['id'])
       end
 
       def mal_mapping

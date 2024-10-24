@@ -5,7 +5,7 @@ require 'rails_helper'
 RSpec.describe ListImport::Anilist::Row do
   shared_examples_for 'Anilist generic row fields' do |klass|
     describe '#media' do
-      it 'should work for anilist lookup' do
+      it 'works for anilist lookup' do
         expect(Mapping).to receive(:lookup)
           .with("anilist/#{type}", anilist_media_id)
           .and_return('hello')
@@ -13,30 +13,30 @@ RSpec.describe ListImport::Anilist::Row do
         subject.media
       end
 
-      it 'should work for myanimelist lookup and create new Mapping' do
-        allow(Mapping).to receive(:lookup).with("anilist/#{type}", anilist_media_id) { nil }
+      it 'works for myanimelist lookup and create new Mapping' do
+        allow(Mapping).to receive(:lookup).with("anilist/#{type}", anilist_media_id).and_return(nil)
         expect(Mapping).to receive(:lookup).with("myanimelist/#{type}", mal_media_id) { db_media }
 
         expect { subject.media }.to change { Mapping.count }.by(1)
       end
 
-      it 'should work for guess' do
-        allow(Mapping).to receive(:lookup) { nil }
+      it 'works for guess' do
+        allow(Mapping).to receive(:lookup).and_return(nil)
         expect(Mapping).to receive(:guess).with(klass, guess_params) { db_media }
 
-        expect { subject.media }.to change { Mapping.count }.by(0)
+        expect { subject.media }.not_to(change { Mapping.count })
       end
     end
 
     describe '#data' do
-      it 'should create a hash with all fields removing any nil' do
+      it 'creates a hash with all fields removing any nil' do
         expect(subject.data).to include(formatted_data)
       end
     end
 
     describe '#score' do
-      it 'should convert no score to nil' do
-        media[:score] = 0
+      it 'converts no score to nil' do
+        media['score'] = 0
 
         expect(subject.data[:rating]).to be_nil
       end
@@ -47,7 +47,7 @@ RSpec.describe ListImport::Anilist::Row do
         end
 
         it 'converts from 89 to 18' do
-          media[:score] = 89
+          media['score'] = 89
 
           expect(subject.data[:rating]).to eq(18)
         end
@@ -87,13 +87,13 @@ RSpec.describe ListImport::Anilist::Row do
     end
 
     describe '#reconsume_count' do
-      it 'should exist' do
+      it 'exists' do
         expect(subject.data[:reconsume_count]).to eq(reconsume_count)
       end
     end
 
     describe '#progress' do
-      it 'should exist' do
+      it 'exists' do
         expect(subject.data[:progress]).to eq(progress)
       end
     end
@@ -110,7 +110,7 @@ RSpec.describe ListImport::Anilist::Row do
       end
 
       it 'can be null' do
-        media[:started_at] = { year: nil, month: nil, day: nil }
+        media['startedAt'] = { year: nil, month: nil, day: nil }
 
         expect(subject.data[:started_at]).to be_nil
       end
@@ -122,7 +122,7 @@ RSpec.describe ListImport::Anilist::Row do
       end
 
       it 'can be null' do
-        media[:completed_at] = { year: nil, month: nil, day: nil }
+        media['completedAt'] = { year: nil, month: nil, day: nil }
 
         expect(subject.data[:finished_at]).to be_nil
       end
@@ -130,22 +130,21 @@ RSpec.describe ListImport::Anilist::Row do
   end
 
   context 'Anime' do
-    subject { described_class.new(JSON.parse(media.to_json, object_class: OpenStruct), type) }
+    subject { described_class.new(media, type) }
 
     let(:db_media) { create(:anime) }
     let(:media) do
       JSON.parse(fixture('list_import/anilist/anime_completed_accel_world.json'))
-          .deep_transform_keys(&:underscore)
     end
 
     let(:formatted_data) do
       {
-        rating: rating,
+        rating:,
         status: :completed,
-        reconsume_count: reconsume_count,
-        progress: progress,
-        started_at: started_at,
-        finished_at: finished_at
+        reconsume_count:,
+        progress:,
+        started_at:,
+        finished_at:
       }
     end
 
@@ -169,28 +168,28 @@ RSpec.describe ListImport::Anilist::Row do
     it_behaves_like 'Anilist generic row fields', Anime
 
     describe '#volumes_owned' do
-      it 'should always be nil' do
+      it 'alwayses be nil' do
         expect(subject.data[:volumes_owned]).to be_nil
       end
     end
   end
 
   context 'Manga' do
-    subject { described_class.new(JSON.parse(media.to_json, object_class: OpenStruct), type) }
+    subject { described_class.new(media, type) }
+
     let(:db_media) { create(:manga) }
     let(:media) do
       JSON.parse(fixture('list_import/anilist/manga_current_arifureta.json'))
-          .deep_transform_keys(&:underscore)
     end
 
     let(:formatted_data) do
       {
-        rating: rating,
-        notes: notes,
+        rating:,
+        notes:,
         status: :current,
-        reconsume_count: reconsume_count,
-        progress: progress,
-        started_at: started_at
+        reconsume_count:,
+        progress:,
+        started_at:
       }
     end
 
@@ -213,14 +212,14 @@ RSpec.describe ListImport::Anilist::Row do
     it_behaves_like 'Anilist generic row fields', Manga
 
     describe '#volumes_owned' do
-      it 'should default to 0' do
-        media[:progress_volumes] = nil
+      it 'defaults to 0' do
+        media['progressVolumes'] = nil
 
         expect(subject.data[:volumes_owned]).to be_zero
       end
 
       it 'can optionally exist' do
-        media[:progress_volumes] = 5
+        media['progressVolumes'] = 5
 
         expect(subject.data[:volumes_owned]).to eq(5)
       end
