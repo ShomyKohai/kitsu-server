@@ -20,9 +20,9 @@ class ListImport < ApplicationRecord
     errors.add(:type, 'must be a ListImport class') unless in_namespace && is_descendant
   end
 
-  def input_file
-    nil
-  end
+  # We want these defined to stop confusing JSONAPI-Resources
+  def input_file = nil
+  def input_file_attacher = nil
 
   # Apply the ListImport
   def apply
