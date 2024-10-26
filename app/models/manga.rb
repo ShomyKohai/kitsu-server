@@ -47,18 +47,18 @@ class Manga < ApplicationRecord
   end
 
   def self.rails_admin_search(keyword)
-    where(id: TypesenseMangaIndex.search(
+    find(TypesenseMangaIndex.search(
       query: keyword,
       query_by: {
         'canonical_title' => 100,
         'titles.*' => 90,
-        'alternative_titles' => 90,
-        'descriptions.*' => 80
+        'alternative_titles' => 90
       }
     ).sort({
       '_text_match(buckets: 6)' => 'desc',
       'user_count' => 'desc'
-    }).include_fields(:id).load.hits.map { |res| res.document['id'] }) end
+    }).include_fields(:id).load.hits.map { |res| res.document['id'] })
+  end
 
   def self.typesense_index
     TypesenseMangaIndex
