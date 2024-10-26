@@ -84,7 +84,7 @@ class Anime < ApplicationRecord
   end
 
   def self.rails_admin_search(keyword)
-    find(TypesenseAnimeIndex.search(
+    where(id: TypesenseAnimeIndex.search(
       query: keyword,
       query_by: {
         'canonical_title' => 100,

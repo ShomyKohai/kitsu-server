@@ -47,7 +47,7 @@ class Manga < ApplicationRecord
   end
 
   def self.rails_admin_search(keyword)
-    find(TypesenseMangaIndex.search(
+    where(id: TypesenseMangaIndex.search(
       query: keyword,
       query_by: {
         'canonical_title' => 100,
