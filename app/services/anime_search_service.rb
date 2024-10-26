@@ -74,7 +74,7 @@ class AnimeSearchService < TypesenseSearchService
       case field
       when '_text_match'
         [['_text_match(buckets: 6)', direction], ['user_count', direction]]
-      when 'start_date', 'created_at'
+      when 'start_date'
         [["#{field}.timestamp", direction]]
       when 'popularity_rank'
         # Invert the direction for popularity_rank
