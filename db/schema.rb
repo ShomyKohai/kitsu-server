@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_28_225045) do
+ActiveRecord::Schema.define(version: 2024_10_27_085701) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "citext"
@@ -225,7 +225,9 @@ ActiveRecord::Schema.define(version: 2024_09_28_225045) do
     t.integer "volume_id"
     t.jsonb "description", default: {}, null: false
     t.jsonb "thumbnail_data"
+    t.integer "status", default: 0, null: false
     t.index ["manga_id"], name: "index_chapters_on_manga_id"
+    t.index ["status"], name: "index_chapters_on_status"
   end
 
   create_table "character_voices", id: :serial, force: :cascade do |t|
@@ -430,7 +432,9 @@ ActiveRecord::Schema.define(version: 2024_09_28_225045) do
     t.boolean "filler"
     t.jsonb "description", default: {}, null: false
     t.jsonb "thumbnail_data"
+    t.integer "status", default: 0, null: false
     t.index ["media_type", "media_id"], name: "index_episodes_on_media_type_and_media_id"
+    t.index ["status"], name: "index_episodes_on_status"
   end
 
   create_table "favorite_genres_users", id: false, force: :cascade do |t|

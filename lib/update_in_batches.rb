@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 module UpdateInBatches
   # rubocop:disable all
   refine ActiveRecord::Relation do
-    def update_in_batches(updates, of: 10000)
+    def update_in_batches(updates = {}, of: 10000, **kwargs)
+      updates = updates.merge(kwargs)
       relation = self
       relation = relation.reorder(batch_order).limit(of)
       batch_relation = relation
