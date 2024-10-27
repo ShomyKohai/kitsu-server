@@ -62,6 +62,8 @@ class EmbedService
               .headers('User-Agent' => USER_AGENT)
               .get(url)
     req.body.to_s if req.status.success?
+  rescue HTTP::Request::UnsupportedSchemeError
+    nil
   end
   delegate :get, to: :class
 
