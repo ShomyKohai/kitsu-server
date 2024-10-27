@@ -482,7 +482,7 @@ GEM
     parser (3.3.1.0)
       ast (~> 2.4.1)
       racc
-    pg (1.5.6)
+    pg (1.5.9)
     pg_query (5.1.0)
       google-protobuf (>= 3.22.3)
     pghero (3.4.1)
@@ -718,7 +718,7 @@ GEM
     snaky_hash (2.0.1)
       hashie
       version_gem (~> 1.1, >= 1.1.1)
-    spring (4.2.0)
+    spring (4.2.1)
     sprockets (4.2.1)
       concurrent-ruby (~> 1.0)
       rack (>= 2.2.4, < 4)
