@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class LibraryEntry < ApplicationRecord
   VALID_RATINGS = (2..20).to_a.freeze
   MEDIA_ASSOCIATIONS = %i[anime manga drama].freeze
@@ -66,7 +68,7 @@ class LibraryEntry < ApplicationRecord
   validate :one_media_present
 
   counter_culture :user, column_name: ->(le) { 'ratings_count' if le.rating },
-                         execute_after_commit: true
+    execute_after_commit: true
   scope :rated, -> { where.not(rating: nil) }
   scope :following, ->(user) do
     user_id = user.respond_to?(:id) ? user.id : user
@@ -130,10 +132,10 @@ class LibraryEntry < ApplicationRecord
       self.media = send(kind)
     else
       kind = media_type&.underscore
-      send("#{kind}=", media) if kind
+      send(:"#{kind}=", media) if kind
     end
 
-    self.nsfw = media.nsfw? if media_id_changed?
+    self.nsfw = media.nsfw? if media_id_changed? && media.present?
     true
   end
 
@@ -145,9 +147,9 @@ class LibraryEntry < ApplicationRecord
     # When progress equals total episodes
     self.status = :completed if !status_changed? && progress == media&.progress_limit
 
-    if status_changed? && completed?
+    if status_changed? && completed? && media&.progress_limit
       # update progress to the cap
-      self.progress = media.progress_limit if media&.progress_limit
+      self.progress = media.progress_limit
     end
 
     unless imported
