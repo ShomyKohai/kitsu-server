@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 Sentry.init do |config|
-  config.enabled_patches += [:sidekiq_scheduler]
   config.release = Rails.root.join('.version').read.strip if Rails.root.join('.version').exist?
   config.traces_sample_rate = 1.0
   config.profiles_sample_rate = 1.0
@@ -13,11 +12,4 @@ Sentry.init do |config|
     duration = event.timestamp - event.start_timestamp
     event if duration > 25.seconds
   end
-end
-
-ActiveSupport::Deprecation.behavior = %i[stderr notify]
-ActiveSupport::Notifications.subscribe('deprecation.rails') do |_, _, _, _, payload|
-  Sentry.capture_message(payload[:message],
-    level: 'warning',
-    backtrace: payload[:callstack].map(&:to_s))
 end
