@@ -1,15 +1,13 @@
+# frozen_string_literal: true
+
 class Episode < ApplicationRecord
-  include Titleable
-  include Mappable
-  include DescriptionSanitation
-  include UnitThumbnailUploader::Attachment(:thumbnail)
+  include Unit
 
   belongs_to :media, polymorphic: true, inverse_of: :episodes
   has_many :videos
   accepts_nested_attributes_for :videos, allow_destroy: true
 
   validates :media, presence: true, polymorphism: { type: Media }
-  validates :number, presence: true
   validates :season_number, presence: true
 
   scope :for_progress, ->(progress) do
@@ -21,7 +19,7 @@ class Episode < ApplicationRecord
 
   def self.length_mode
     mode, count = reorder(count_all: :desc).group(:length).count.first
-    { mode: mode, count: count }
+    { mode:, count: }
   end
 
   def self.length_average

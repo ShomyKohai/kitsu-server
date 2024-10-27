@@ -1,12 +1,11 @@
+# frozen_string_literal: true
+
 class Chapter < ApplicationRecord
-  include Titleable
-  include DescriptionSanitation
-  include UnitThumbnailUploader::Attachment(:thumbnail)
+  include Unit
 
   belongs_to :manga, inverse_of: :chapters
   belongs_to :volume, counter_cache: true, optional: true, inverse_of: :chapters
 
-  validates :number, presence: true
   validates :volume_number, presence: true
 
   scope :for_progress, ->(progress) do
