@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module IgnorePreloadingNils
   extend ActiveSupport::Concern
 
@@ -128,6 +130,8 @@ module IgnorePreloadingNils
               assoc_rels[rel_id] = target_resources[klass.name][rel_id]
             else
               res = assoc_rels[rel_id]
+              # One of the intermediate associations is missing, so we can't preload.
+              break if res.nil?
             end
             assoc_rels.compact!
           end
